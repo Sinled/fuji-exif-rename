@@ -4,14 +4,8 @@ xt5_exif_tool.py
 
 Standalone EXIF dumper & renamer for Fujifilm X-T5 images.
 
-Can be run directly with file paths as arguments:
-
-    ./xt5_exif_tool.py IMG1.JPG IMG2.RAF
-
-Or inside an Alfred “Run Script” action as argv or stdin.
-
-When run with -v/--verbose, logs DEBUG+INFO messages only to xt5_exif_tool.log
-and prints a one‐line notice to stderr. Without -v, no logging is performed
+When run with -v/--verbose, logs detailed EXIF & processing info only to xt5_exif_tool.log
+and prints a one-line notice to stderr. Without -v, no logging is performed
 and only filenames are printed to stdout.
 
 Pass `--rename` to actually rename each file to its new name.
@@ -23,7 +17,7 @@ import subprocess
 import json
 import logging
 import argparse
-from typing import List, Any, Optional
+from typing import List, Optional, Any
 
 LOG_FILE = "xt5_exif_tool.log"
 
@@ -46,7 +40,7 @@ def get_exif_via_exiftool(filepath: str) -> dict:
             capture_output=True, text=True, check=True
         )
         data = json.loads(res.stdout)
-        logging.debug(f"exiftool → {filepath}: {data}")
+        logging.debug(f"Loaded EXIF for {filepath}")
         return data[0] if data else {}
     except FileNotFoundError:
         logging.error("exiftool not found. Install it first.")
@@ -54,6 +48,13 @@ def get_exif_via_exiftool(filepath: str) -> dict:
     except subprocess.CalledProcessError as e:
         logging.error(f"exiftool error on {filepath}: {e}")
         return {}
+
+def dump_all_exif(filepath: str, exif: dict) -> None:
+    fname = os.path.basename(filepath)
+    formatted = json.dumps(exif, indent=2, ensure_ascii=False)
+    logging.info(f"--- Formatted EXIF for {fname} ---\n{formatted}")
+    for tag, val in sorted(exif.items()):
+        logging.debug(f"{tag}: {val}")
 
 def fetch(exif: dict, tag_name: str, default: Optional[Any] = None) -> Any:
     for key, val in exif.items():
@@ -104,11 +105,16 @@ def build_new_name(filepath: str, exif: dict) -> str:
         tags.append(f"[{seq:02d}]")
         logging.debug(f"Applied raw SequenceNumber tag: {seq:02d}")
 
-    # FilmMode
-    if isinstance(film, str) and "(" in film and ")" in film:
-        name = film.split("(",1)[1].split(")",1)[0].replace(" ", "")
-        tags.append(f"[{name}]")
-        logging.debug(f"Applied FilmMode tag: {name}")
+    # FilmMode (capture name_clean for later)
+    film_tag_name: Optional[str] = None
+    if isinstance(film, str) and film.strip():
+        if "(" in film and ")" in film:
+            name = film.split("(", 1)[1].split(")", 1)[0].strip()
+        else:
+            name = film.strip()
+        film_tag_name = name.replace(" ", "")
+        tags.append(f"[{film_tag_name}]")
+        logging.debug(f"Applied FilmMode tag: {film_tag_name}")
 
     # AdvancedFilter
     if isinstance(adv, str) and adv.strip():
@@ -116,13 +122,13 @@ def build_new_name(filepath: str, exif: dict) -> str:
         tags.append(f"[{af}]")
         logging.debug(f"Applied AdvancedFilter tag: {af}")
 
-    # Saturation
-    if not any(t.startswith("[") and t.endswith("]") and t[1:-1] in film for t in tags):
+    # Saturation (skip if film_tag_name present or exactly "0 (normal)")
+    if film_tag_name is None and isinstance(sat, str):
         sc = sat.strip()
         if sc and sc.lower() != "0 (normal)":
-            tag = sc.replace(" ", "")
-            tags.append(f"[{tag}]")
-            logging.debug(f"Applied Saturation tag: {tag}")
+            sat_tag = sc.replace(" ", "")
+            tags.append(f"[{sat_tag}]")
+            logging.debug(f"Applied Saturation tag: {sat_tag}")
 
     suffix = "_" + "".join(tags) if tags else ""
     return f"{base}{suffix}{ext}"
@@ -130,13 +136,12 @@ def build_new_name(filepath: str, exif: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description="xt5_exif_tool")
     parser.add_argument("-v", "--verbose", action="store_true",
-                        help="enable logging to file and notify")
+                        help="enable logging to file")
     parser.add_argument("--rename", action="store_true",
-                        help="actually rename files to their new names")
+                        help="actually rename files")
     parser.add_argument("images", nargs="*", help="image files to process")
     args = parser.parse_args()
 
-    # Determine image list: args.images or stdin
     if args.images:
         images = args.images
     else:
@@ -155,6 +160,7 @@ def main():
             logging.warning(f"Not found: {img}")
             continue
         exif = get_exif_via_exiftool(img)
+        dump_all_exif(img, exif)
         newname = build_new_name(img, exif)
         dirpath = os.path.dirname(img) or "."
         dest = os.path.join(dirpath, newname)
@@ -168,7 +174,6 @@ def main():
                 sys.stderr.write(f"Error: could not rename {img}\n")
                 continue
 
-        # print the new filename (or renamed filename)
         print(newname)
 
 if __name__ == "__main__":
