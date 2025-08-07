@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.alfred.sinled.fuji-exif-rename</string>
+	<key>category</key>
+	<string>Tools</string>
+	<key>connections</key>
+	<dict>
+		<key>2D500249-61F4-45C5-B9D5-ECD1CDF58A74</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>E2EC549B-046B-4FCC-B9A3-5E795D4E94C2</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Sinled</string>
+	<key>description</key>
+	<string>Rename Fuji files to add film simulations and other meta information to file</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>My Fuji Exif Rename</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>acceptsmulti</key>
+				<integer>1</integer>
+				<key>filetypes</key>
+				<array>
+					<string>com.fuji.raw-image</string>
+					<string>public.heic</string>
+					<string>public.heif</string>
+					<string>public.jpeg</string>
+				</array>
+				<key>name</key>
+				<string>EXIF Rename</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.action</string>
+			<key>uid</key>
+			<string>2D500249-61F4-45C5-B9D5-ECD1CDF58A74</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<false/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>Results</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>E2EC549B-046B-4FCC-B9A3-5E795D4E94C2</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>68</integer>
+				<key>script</key>
+				<string>#!/usr/bin/env bash
+
+# workflow booleans: rename_files, write_log
+flags=()
+
+# Alfred sets a Boolean to "1" when checked
+if [[ "${rename_files}" == "1" ]]; then
+  flags+=(--rename)
+fi
+
+if [[ "${write_log}" == "1" ]]; then
+  flags+=(-v)
+fi
+
+# run the tool with any flags, and all selected files
+python3 xt5_exif_tool.py "${flags[@]}" "$@"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>Fuji EXIF Renamer
+
+This workflow lets you select one or more Fujifilm images in Alfred and automatically generates (and optionally applies) new filenames based on EXIF tags (HDR, sequence, drive mode, film simulation, advanced filter, saturation).
+
+Features
+	•	Extracts MakerNotes via exiftool
+	•	Detects and tags:
+	•	HDR (PictureMode)
+	•	SequenceNumber (with CL/CH/EB prefixes)
+	•	Film Simulation (FilmMode)
+	•	AdvancedFilter
+	•	Saturation (skipped if 0 (normal) or if film mode present)
+	•	Single underscore separator: `DSCF2278_[HDR][EB01][Velvia].JPG`
+
+Needs `exiftool` installed in a system
+
+```
+brew install exiftool
+```</string>
+	<key>uidata</key>
+	<dict>
+		<key>2D500249-61F4-45C5-B9D5-ECD1CDF58A74</key>
+		<dict>
+			<key>xpos</key>
+			<real>30</real>
+			<key>ypos</key>
+			<real>205</real>
+		</dict>
+		<key>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</key>
+		<dict>
+			<key>xpos</key>
+			<real>200</real>
+			<key>ypos</key>
+			<real>205</real>
+		</dict>
+		<key>E2EC549B-046B-4FCC-B9A3-5E795D4E94C2</key>
+		<dict>
+			<key>xpos</key>
+			<real>375</real>
+			<key>ypos</key>
+			<real>205</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<true/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Enable</string>
+			</dict>
+			<key>description</key>
+			<string>If Disabled alfred will just list new names in notification and workflow debug</string>
+			<key>label</key>
+			<string>Rename files</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>rename_files</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<false/>
+				<key>required</key>
+				<false/>
+				<key>text</key>
+				<string>Enable</string>
+			</dict>
+			<key>description</key>
+			<string>Information log will be saved inside workflow directory (will grow depending on number of files)</string>
+			<key>label</key>
+			<string>Write Log</string>
+			<key>type</key>
+			<string>checkbox</string>
+			<key>variable</key>
+			<string>write_log</string>
+		</dict>
+	</array>
+	<key>version</key>
+	<string>0.0.1</string>
+	<key>webaddress</key>
+	<string>https://github.com/Sinled</string>
+</dict>
+</plist>
