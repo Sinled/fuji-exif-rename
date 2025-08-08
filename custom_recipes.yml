@@ -1,0 +1,16 @@
+- name: Reggies portra
+  settings:
+    FilmMode: Classic Chrome
+    DynamicRangeSetting: DR-Auto
+    HighlightTone: -1
+    ShadowTone: -1
+    Color: +2
+    NoiseReduction: -4
+    Sharpness: -2
+    Clarity: 0
+    GrainEffectRoughness: Weak
+    GrainEffectSize: Small
+    ColorChromeEffect: Strong
+    ColorChromeFXBlue: Weak
+    WhiteBalance: Auto
+    WhiteBalanceFineTune: '+20 Red, -40 Blue'
