@@ -1,7 +1,7 @@
 # Fujifilm EXIF Renamer (with Recipes)
 
 A tiny Python + exiftool helper to **inspect EXIF** and **rename photos** based on camera settings.  
-Optionally matches your shots against **custom “recipes”** (Vibrant Arizona, Reggie's Portra and some other of the recipes that I am using) and uses the recipe name in the filename.
+Optionally matches your shots against **custom “recipes”** (Vibrant Arizona, Reggie's Portra and some other of the recipes that I am using) and uses the recipe name in the filename e.g. `DSCF2289_[HDR][01][VibrantArizona].JPG`
 
 ---
 
@@ -79,6 +79,14 @@ You can add your own recipes in alfred workflow settings, here are example of cu
 ]
 ```
 
-Make sure you have correct JSON before pasting it into the workflow settings. You can check correct values by enabling **Write log** in the workflow settings and checking the log output in workflow directory or by uploading a photo to some online EXIF viewer e.g. `https://jimpl.com` or some other.
+## Troubleshooting
 
-If this tool is not applying recipe name after you added it, check log file, it will print out all the settings that it is trying to match against your recipe.
+### JSON is not valid
+
+Make sure you have correct JSON before pasting it into the workflow settings. 
+
+### Recipe is not applied
+
+You can check the correct values for recipe mathcing by enabling **Write log** in the workflow settings and checking the log output in workflow directory or by uploading a photo to some online EXIF viewer e.g. [jimpl](https://jimpl.com) 
+
+If this tool is not applying recipe name after you added it, check the log file, it will print out all the settings that it is trying to match against your recipe.
