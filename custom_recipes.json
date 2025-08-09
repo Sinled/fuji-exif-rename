@@ -1,0 +1,116 @@
+[
+    {
+        "name": "Reggies Portra",
+        "settings": {
+            "FilmMode": "Classic Chrome",
+            "DynamicRangeSetting": "Auto",
+            "HighlightTone": "-1 (medium soft)",
+            "ShadowTone": "-1 (medium soft)",
+            "Saturation": "+2 (high)",
+            "NoiseReduction": "-4 (weakest)",
+            "Sharpness": "Soft",
+            "Clarity": 0,
+            "GrainEffectRoughness": "Weak",
+            "GrainEffectSize": "Small",
+            "ColorChromeEffect": "Strong",
+            "ColorChromeFXBlue": "Weak",
+            "WhiteBalance": "Auto",
+            "WhiteBalanceFineTune": "Red +40, Blue -80"
+        }
+    },
+    {
+        "name": "Alpine Negative",
+        "settings": {
+            "FilmMode": "Classic Negative",
+            "DevelopmentDynamicRange": 400,
+            "HighlightTone": "-2 (soft)",
+            "ShadowTone": "+1 (medium hard)",
+            "Saturation": "+4 (highest)",
+            "NoiseReduction": "-4 (weakest)",
+            "Sharpness": "Normal",
+            "Clarity": -3,
+            "ColorChromeEffect": "Off",
+            "ColorChromeFXBlue": "Strong",
+            "GrainEffectRoughness": "Off",
+            "WhiteBalance": "Auto",
+            "WhiteBalanceFineTune": "Red +40, Blue -80"
+        }
+    },
+    {
+        "name": "Cinestill 500T",
+        "settings": {
+            "FilmMode": "Classic Chrome",
+            "DynamicRangeSetting": "Auto",
+            "HighlightTone": "-2 (soft)",
+            "ShadowTone": "-1 (medium soft)",
+            "Saturation": "-1 (medium low)",
+            "NoiseReduction": "-2 (weak)",
+            "Sharpness": "Soft",
+            "Clarity": 0,
+            "ColorChromeEffect": "Strong",
+            "ColorChromeFXBlue": "Strong",
+            "GrainEffectRoughness": "Off",
+            "WhiteBalance": "Manual",
+            "ColorTemperature": 3200,
+            "WhiteBalanceFineTune": "Red -20, Blue +80"
+        }
+    },
+    {
+        "name": "Classic Cuban Neg",
+        "settings": {
+            "FilmMode": "Classic Negative",
+            "DevelopmentDynamicRange": 400,
+            "HighlightTone": "-2 (soft)",
+            "ShadowTone": "+1 (medium hard)",
+            "Saturation": "+4 (highest)",
+            "NoiseReduction": "-4 (weakest)",
+            "Sharpness": "Normal",
+            "Clarity": -4,
+            "ColorChromeEffect": "Strong",
+            "ColorChromeFXBlue": "Strong",
+            "GrainEffectRoughness": "Strong",
+            "GrainEffectSize": "Large",
+            "WhiteBalance": "Auto",
+            "WhiteBalanceFineTune": "Red +80, Blue -100"
+        }
+    },
+    {
+        "name": "Leica X",
+        "settings": {
+            "FilmMode": "Classic Chrome",
+            "DynamicRangeSetting": "Auto",
+            "HighlightTone": "-1 (medium soft)",
+            "ShadowTone": "0 (normal)",
+            "Saturation": "+4 (highest)",
+            "NoiseReduction": "-4 (weakest)",
+            "Sharpness": "Normal",
+            "Clarity": 0,
+            "ColorChromeEffect": "Strong",
+            "ColorChromeFXBlue": "Strong",
+            "GrainEffectRoughness": "Off",
+            "WhiteBalance": "Auto",
+            "WhiteBalanceFineTune": "Red +20, Blue -40"
+        }
+    },
+    {
+        "name": "Vibrant Arizona",
+        "settings": {
+            "FilmMode": "Classic Chrome",
+            "DRangePriority": "Fixed",
+            "DRangePriorityAuto": "Strong",
+            "HighlightTone": "0 (normal)",
+            "ShadowTone": "0 (normal)",
+            "Saturation": "+4 (highest)",
+            "NoiseReduction": "-4 (weakest)",
+            "Sharpness": "Soft",
+            "Clarity": -3,
+            "ColorChromeEffect": "Off",
+            "ColorChromeFXBlue": "Weak",
+            "GrainEffectRoughness": "Weak",
+            "GrainEffectSize": "Small",
+            "WhiteBalance": "Manual",
+            "ColorTemperature": 4350,
+            "WhiteBalanceFineTune": "Red +120, Blue -160"
+        }
+    }
+]
