@@ -68,13 +68,15 @@
 # workflow booleans: rename_files, write_log
 flags=()
 
-# Alfred sets a Boolean to "1" when checked
 if [[ "${rename_files}" == "1" ]]; then
   flags+=(--rename)
 fi
-
 if [[ "${write_log}" == "1" ]]; then
   flags+=(-v)
+fi
+
+if [[ -n "${user_custom_recipes}" ]]; then
+  flags+=(--recipes-json "${user_custom_recipes}")
 fi
 
 # run the tool with any flags, and all selected files
