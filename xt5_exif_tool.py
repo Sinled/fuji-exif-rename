@@ -2,15 +2,12 @@
 """
 xt5_exif_tool.py
 
-Standalone EXIF dumper & renamer for Fujifilm X-T5 images, with support for
-custom “recipes” defined in a JSON file. If an image’s EXIF matches all
-settings in a recipe, the recipe’s name is used instead of the FilmMode tag.
+EXIF dumper & renamer for Fujifilm X-T5.
+- Supports default recipes in custom_recipes.json
+- Supports extra recipes via --recipes-json (prepended to override defaults)
+- When -v is set, logs to xt5_exif_tool.log; otherwise prints only new names.
 
-When run with -v/--verbose, logs detailed EXIF & processing info only to
-xt5_exif_tool.log and prints a one‐line notice to stderr. Without -v, no
-logging is performed and only filenames are printed to stdout.
-
-Pass `--rename` to actually rename each file to its new name.
+Pass --rename to actually rename files.
 """
 
 import sys
@@ -24,16 +21,6 @@ from typing import List, Any, Optional, Dict
 LOG_FILE = "xt5_exif_tool.log"
 RECIPES_FILE = os.path.join(os.path.dirname(__file__), "custom_recipes.json")
 
-# Load recipes at startup
-try:
-    with open(RECIPES_FILE, 'r', encoding='utf-8') as f:
-        RECIPES: List[Dict[str, Any]] = json.load(f)
-except Exception as e:
-    # If verbose logging is off, this will be silenced
-    logging.warning(f"Could not load recipes from {RECIPES_FILE}: {e}")
-    RECIPES = []
-
-
 def setup_logging(verbose: bool):
     logger = logging.getLogger()
     logger.handlers.clear()
@@ -45,7 +32,6 @@ def setup_logging(verbose: bool):
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s: %(message)s"))
     logger.addHandler(fh)
-
 
 def get_exif_via_exiftool(filepath: str) -> dict:
     try:
@@ -63,17 +49,12 @@ def get_exif_via_exiftool(filepath: str) -> dict:
         logging.error(f"exiftool error on {filepath}: {e}")
         return {}
 
-
 def dump_all_exif(filepath: str, exif: dict) -> None:
-    """
-    Log the full EXIF dict in pretty-printed JSON (INFO), then each tag (DEBUG).
-    """
     fname = os.path.basename(filepath)
     formatted = json.dumps(exif, indent=2, ensure_ascii=False)
     logging.info(f"--- Formatted EXIF for {fname} ---\n{formatted}")
     for tag, val in sorted(exif.items()):
         logging.debug(f"{tag}: {val}")
-
 
 def fetch(exif: dict, tag_name: str, default: Optional[Any] = None) -> Any:
     for key, val in exif.items():
@@ -83,16 +64,51 @@ def fetch(exif: dict, tag_name: str, default: Optional[Any] = None) -> Any:
             return val
     return default
 
+def parse_recipes_json(s: Optional[str]) -> List[Dict[str, Any]]:
+    if not s:
+        return []
+    try:
+        data = json.loads(s)
+        if isinstance(data, list):
+            return [r for r in data if isinstance(r, dict)]
+        logging.warning("recipes-json is not a list; ignoring.")
+    except Exception as e:
+        logging.warning(f"Failed to parse recipes-json: {e}")
+    return []
 
-def match_recipe(exif: dict) -> Optional[str]:
+def load_recipes(extra_json: Optional[str]) -> List[Dict[str, Any]]:
+    # load defaults
+    base: List[Dict[str, Any]] = []
+    try:
+        if os.path.isfile(RECIPES_FILE):
+            with open(RECIPES_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, list):
+                    base = [r for r in loaded if isinstance(r, dict)]
+                logging.debug(f"Loaded {len(base)} default recipes from {RECIPES_FILE}")
+        else:
+            logging.debug(f"No default recipes file at {RECIPES_FILE}")
+    except Exception as e:
+        logging.warning(f"Could not load default recipes: {e}")
+
+    # load extras (prepend)
+    extras = parse_recipes_json(extra_json)
+    logging.debug(f"Loaded {len(extras)} extra recipes from CLI/env")
+
+    merged = extras + base
+    logging.info(f"Total recipes (extras+defaults): {len(merged)}")
+    return merged
+
+def match_recipe(exif: dict, recipes: List[Dict[str, Any]]) -> Optional[str]:
     """
-    If EXIF matches all settings in a recipe, return that recipe's name.
-    Otherwise return None.
-    Adds logging of each comparison between recipe and EXIF values.
+    Return the first recipe name whose settings all match the EXIF.
+    Logs each tag comparison: expected vs actual.
     """
-    for rec in RECIPES:
+    for rec in recipes:
         name = rec.get("name")
         settings = rec.get("settings", {})
+        if not isinstance(settings, dict):
+            continue
         all_match = True
         for tag, expected in settings.items():
             actual = fetch(exif, tag)
@@ -105,16 +121,15 @@ def match_recipe(exif: dict) -> Optional[str]:
             return name
     return None
 
-
-def build_new_name(filepath: str, exif: dict) -> str:
+def build_new_name(filepath: str, exif: dict, recipes: List[Dict[str, Any]]) -> str:
     fname = os.path.basename(filepath)
     base, ext = os.path.splitext(fname)
 
-    # Try to match a recipe first
-    recipe_name = match_recipe(exif)
+    # Try to match recipe first
+    recipe_name = match_recipe(exif, recipes)
 
     tags: List[str] = []
-    film_or_recipe_name: Optional[str] = None  # <-- key flag for saturation logic
+    film_or_recipe_name: Optional[str] = None
 
     # 1) HDR
     pic_mode = fetch(exif, "PictureMode", "")
@@ -147,7 +162,7 @@ def build_new_name(filepath: str, exif: dict) -> str:
         tags.append(f"[{seq:02d}]")
         logging.debug(f"Applied raw SequenceNumber tag: {seq:02d}")
 
-    # 3) Film simulation or recipe (record that we added it)
+    # 3) Film/Recipe tag
     if recipe_name:
         film_or_recipe_name = recipe_name.replace(" ", "")
         tags.append(f"[{film_or_recipe_name}]")
@@ -191,9 +206,15 @@ def main():
                         help="enable logging to file")
     parser.add_argument("--rename", action="store_true",
                         help="actually rename files")
+    parser.add_argument("--recipes-json", type=str, default=None,
+                        help="JSON array of custom recipes to prepend (overrides defaults if matched)")
     parser.add_argument("images", nargs="*", help="image files to process")
     args = parser.parse_args()
 
+    # Support env var fallback if arg not provided
+    extra_recipes_json = args.recipes_json or os.environ.get("user_custom_recipes")
+
+    # Determine image list: args.images or stdin
     if args.images:
         images = args.images
     else:
@@ -207,13 +228,15 @@ def main():
     if args.verbose:
         sys.stderr.write(f"Logging enabled: details written to {LOG_FILE}\n")
 
+    recipes = load_recipes(extra_recipes_json)
+
     for img in images:
         if not os.path.isfile(img):
             logging.warning(f"Not found: {img}")
             continue
         exif = get_exif_via_exiftool(img)
         dump_all_exif(img, exif)
-        newname = build_new_name(img, exif)
+        newname = build_new_name(img, exif, recipes)
         dest = os.path.join(os.path.dirname(img) or ".", newname)
 
         if args.rename:
