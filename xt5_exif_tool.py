@@ -110,9 +110,11 @@ def build_new_name(filepath: str, exif: dict) -> str:
     fname = os.path.basename(filepath)
     base, ext = os.path.splitext(fname)
 
-    # Attempt recipe match first
+    # Try to match a recipe first
     recipe_name = match_recipe(exif)
+
     tags: List[str] = []
+    film_or_recipe_name: Optional[str] = None  # <-- key flag for saturation logic
 
     # 1) HDR
     pic_mode = fetch(exif, "PictureMode", "")
@@ -145,43 +147,43 @@ def build_new_name(filepath: str, exif: dict) -> str:
         tags.append(f"[{seq:02d}]")
         logging.debug(f"Applied raw SequenceNumber tag: {seq:02d}")
 
-    # 3) Film simulation or recipe
+    # 3) Film simulation or recipe (record that we added it)
     if recipe_name:
-        clean = recipe_name.replace(" ", "")
-        tags.append(f"[{clean}]")
+        film_or_recipe_name = recipe_name.replace(" ", "")
+        tags.append(f"[{film_or_recipe_name}]")
         logging.debug(f"Applied Recipe tag: {recipe_name}")
     else:
         film = fetch(exif, "FilmMode", "")
         if isinstance(film, str) and film.strip():
             if "(" in film and ")" in film:
-                name = film.split("(",1)[1].split(")",1)[0].strip()
+                name = film.split("(", 1)[1].split(")", 1)[0].strip()
             else:
                 name = film.strip()
-            clean = name.replace(" ", "")
-            tags.append(f"[{clean}]")
+            film_or_recipe_name = name.replace(" ", "")
+            tags.append(f"[{film_or_recipe_name}]")
             logging.debug(f"Applied FilmMode tag: {name}")
 
     # 4) AdvancedFilter
     adv = fetch(exif, "AdvancedFilter", "")
     if isinstance(adv, str) and adv.strip():
-        clean = adv.replace(" ", "")
-        tags.append(f"[{clean}]")
+        adv_clean = adv.replace(" ", "")
+        tags.append(f"[{adv_clean}]")
         logging.debug(f"Applied AdvancedFilter tag: {adv}")
 
-    # 5) Saturation
-    if not recipe_name:
+    # 5) Saturation — ONLY if no film/recipe tag was added and not "0 (normal)"
+    if film_or_recipe_name is None:
         sat = fetch(exif, "Saturation", "")
         if isinstance(sat, str):
             sc = sat.strip()
-            last = tags[-1][1:-1] if tags else ""
-            if sc and sc.lower() != "0 (normal)" and sc.replace(" ", "") != last:
+            if sc and sc.lower() != "0 (normal)":
                 sat_tag = sc.replace(" ", "")
                 tags.append(f"[{sat_tag}]")
                 logging.debug(f"Applied Saturation tag: {sc}")
+    else:
+        logging.debug("Skipped Saturation tag because Film/Recipe tag is present")
 
     suffix = "_" + "".join(tags) if tags else ""
     return f"{base}{suffix}{ext}"
-
 
 def main():
     parser = argparse.ArgumentParser(description="xt5_exif_tool")

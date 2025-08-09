@@ -33,6 +33,16 @@
 				<key>vitoclose</key>
 				<false/>
 			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>8776791B-7CD3-40B1-AB83-71FA0EA459C1</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
 		</array>
 	</dict>
 	<key>createdby</key>
@@ -45,6 +55,44 @@
 	<string>My Fuji Exif Rename</string>
 	<key>objects</key>
 	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>68</integer>
+				<key>script</key>
+				<string>#!/usr/bin/env bash
+
+# workflow booleans: rename_files, write_log
+flags=()
+
+# Alfred sets a Boolean to "1" when checked
+if [[ "${rename_files}" == "1" ]]; then
+  flags+=(--rename)
+fi
+
+if [[ "${write_log}" == "1" ]]; then
+  flags+=(-v)
+fi
+
+# run the tool with any flags, and all selected files
+python3 xt5_exif_tool.py "${flags[@]}" "$@"</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
@@ -91,40 +139,21 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
+				<key>autopaste</key>
 				<false/>
-				<key>escaping</key>
-				<integer>68</integer>
-				<key>script</key>
-				<string>#!/usr/bin/env bash
-
-# workflow booleans: rename_files, write_log
-flags=()
-
-# Alfred sets a Boolean to "1" when checked
-if [[ "${rename_files}" == "1" ]]; then
-  flags+=(--rename)
-fi
-
-if [[ "${write_log}" == "1" ]]; then
-  flags+=(-v)
-fi
-
-# run the tool with any flags, and all selected files
-python3 xt5_exif_tool.py "${flags[@]}" "$@"</string>
-				<key>scriptargtype</key>
-				<integer>1</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>0</integer>
+				<key>clipboardtext</key>
+				<string>{query}</string>
+				<key>ignoredynamicplaceholders</key>
+				<false/>
+				<key>transient</key>
+				<false/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.action.script</string>
+			<string>alfred.workflow.output.clipboard</string>
 			<key>uid</key>
-			<string>3A29BB60-C8EF-44F1-9610-2B1B1771DD68</string>
+			<string>8776791B-7CD3-40B1-AB83-71FA0EA459C1</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 	</array>
 	<key>readme</key>
@@ -162,6 +191,13 @@ brew install exiftool
 			<real>200</real>
 			<key>ypos</key>
 			<real>205</real>
+		</dict>
+		<key>8776791B-7CD3-40B1-AB83-71FA0EA459C1</key>
+		<dict>
+			<key>xpos</key>
+			<real>380</real>
+			<key>ypos</key>
+			<real>325</real>
 		</dict>
 		<key>E2EC549B-046B-4FCC-B9A3-5E795D4E94C2</key>
 		<dict>
@@ -210,6 +246,27 @@ brew install exiftool
 			<string>checkbox</string>
 			<key>variable</key>
 			<string>write_log</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>[]</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+				<key>verticalsize</key>
+				<integer>9</integer>
+			</dict>
+			<key>description</key>
+			<string>As Fuji is not storing recipes names in EXIF, we can manually detect recipe from its settings strored in image EXIF. See documentation on Github for correct format</string>
+			<key>label</key>
+			<string>Custom Recipes JSON</string>
+			<key>type</key>
+			<string>textarea</string>
+			<key>variable</key>
+			<string>user_custom_recipes</string>
 		</dict>
 	</array>
 	<key>version</key>
