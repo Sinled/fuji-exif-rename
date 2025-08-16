@@ -3,6 +3,13 @@
 A tiny Python + exiftool helper to **inspect EXIF** and **rename photos** based on camera settings.  
 Optionally matches your shots against **custom “recipes”** (Vibrant Arizona, Reggie's Portra and some other of the recipes that I am using) and uses the recipe name in the filename e.g. `DSCF2289_[HDR][01][VibrantArizona].JPG`
 
+Selection in Finder and Alfred universal action:
+![Running workflow](https://raw.githubusercontent.com/Sinled/fuji-exif-rename/refs/heads/main/images/alfred-exif-rename.webp)
+
+Result of running workflow:
+
+![Renamed files](https://raw.githubusercontent.com/Sinled/fuji-exif-rename/refs/heads/main/images/alfred-exif-rename-result.webp)
+
 ---
 
 ## Installation
